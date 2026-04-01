@@ -1,0 +1,16 @@
+{
+  "name": "ols-ambient-adapter",
+  "version": "0.1.0",
+  "private": true,
+  "description": "POC adapter: translates OLS API to Ambient AG-UI protocol",
+  "main": "adapter.js",
+  "scripts": {
+    "start": "node adapter.js"
+  },
+  "dependencies": {
+    "express": "^4.21.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

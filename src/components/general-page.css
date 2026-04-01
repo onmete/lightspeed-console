@@ -72,7 +72,16 @@
 }
 
 .ols-plugin__header-actions {
+  align-items: center;
   gap: 0 !important;
+}
+
+.ols-plugin__model-selector {
+  margin-right: var(--pf-t--global--spacer--sm);
+}
+
+.ols-plugin__model-selector-toggle {
+  font-size: var(--pf-t--global--font--size--body--sm);
 }
 
 .ols-plugin__header-title {
@@ -133,4 +142,66 @@
 .ols-plugin__tool-section-title {
   margin-bottom: var(--pf-t--global--spacer--sm);
   margin-top: var(--pf-t--global--spacer--md);
+}
+
+.ols-plugin__reasoning {
+  border-left: 3px solid var(--pf-t--global--border--color--default);
+  color: var(--pf-t--global--text--color--subtle);
+  font-style: italic;
+  margin-bottom: var(--pf-t--global--spacer--md);
+  padding: var(--pf-t--global--spacer--sm) var(--pf-t--global--spacer--md);
+  white-space: pre-wrap;
+}
+
+.ols-plugin__reasoning--inline {
+  font-size: var(--pf-t--global--font--size--body--sm);
+  margin-bottom: var(--pf-t--global--spacer--sm);
+  margin-top: var(--pf-t--global--spacer--sm);
+}
+
+.ols-plugin__reasoning-label {
+  display: block;
+  font-style: normal;
+  font-weight: var(--pf-t--global--font--weight--body--bold);
+  margin-bottom: var(--pf-t--global--spacer--xs);
+}
+
+.ols-plugin__content-blocks {
+  display: flex;
+  flex-direction: column;
+}
+
+.ols-plugin__content-block-text {
+  margin-bottom: var(--pf-t--global--spacer--sm);
+  overflow-wrap: break-word;
+  white-space: pre-wrap;
+}
+
+.ols-plugin__content-block-tool {
+  margin-bottom: var(--pf-t--global--spacer--sm);
+  margin-top: var(--pf-t--global--spacer--xs);
+}
+
+.ols-plugin__content-block-tool-label {
+  font-size: var(--pf-t--global--font--size--body--sm);
+}
+
+.ols-plugin__modal-overlay {
+  background-color: var(--pf-t--global--background--color--backdrop--default);
+  inset: 0;
+  position: absolute;
+  z-index: 1000;
+}
+
+.ols-plugin__modal {
+  background: var(--pf-t--global--background--color--primary--default);
+  border: var(--pf-t--global--border--width--regular) solid var(--pf-t--global--border--color--default);
+  border-radius: var(--pf-t--global--border--radius--medium);
+  box-shadow: var(--pf-t--global--box-shadow--lg);
+  margin: var(--pf-t--global--spacer--xl) auto;
+  max-height: 70%;
+  max-width: 90%;
+  overflow-y: auto;
+  padding: var(--pf-t--global--spacer--md);
+  position: relative;
 }

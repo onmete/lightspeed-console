@@ -40,7 +40,7 @@ import {
   setQuery,
 } from '../redux-actions';
 import { State } from '../redux-reducers';
-import { Attachment } from '../types';
+import { Attachment, ContentBlock } from '../types';
 import AttachEventsModal from './AttachEventsModal';
 import AttachLogModal from './AttachLogModal';
 import AttachmentLabel from './AttachmentLabel';
@@ -91,6 +91,9 @@ const Prompt: React.FC<PromptProps> = ({ scrollIntoView }) => {
   const events = useSelector((s: State) => s.plugins?.ols?.get('contextEvents'));
   const isEventsLoading = useSelector((s: State) => s.plugins?.ols?.get('isContextEventsLoading'));
   const query: string = useSelector((s: State) => s.plugins?.ols?.get('query'));
+  const selectedModel: string = useSelector(
+    (s: State) => s.plugins?.ols?.get('selectedModel') ?? 'claude-sonnet-4-5',
+  );
 
   const [error, setError] = React.useState<string>();
   const [isEventsModalOpen, , openEventsModal, closeEventsModal] = useBoolean(false);
@@ -498,6 +501,7 @@ const Prompt: React.FC<PromptProps> = ({ scrollIntoView }) => {
       conversation_id: conversationID,
       // eslint-disable-next-line camelcase
       media_type: 'application/json',
+      model: selectedModel,
       query,
     };
 
@@ -526,15 +530,34 @@ const Prompt: React.FC<PromptProps> = ({ scrollIntoView }) => {
       const reader = response.body.getReader();
       const decoder = new TextDecoder();
       let responseText = '';
+      let reasoningText = '';
+      let reasoningRound = -1;
+      const contentBlocks: ContentBlock[] = [];
 
-      // Throttle response text updates to prevent excessive re-renders during streaming
+      const appendToBlock = (type: 'reasoning' | 'text', delta: string) => {
+        const last = contentBlocks[contentBlocks.length - 1];
+        if (last && last.type === type) {
+          last.content += delta;
+        } else {
+          contentBlocks.push({ type, content: delta });
+        }
+      };
+
       const dispatchTokens = throttle(
-        () => dispatch(chatHistoryUpdateByID(chatEntryID, { text: responseText })),
+        () => {
+          dispatch(
+            chatHistoryUpdateByID(chatEntryID, {
+              contentBlocks: [...contentBlocks],
+              reasoning: reasoningText || undefined,
+              text: responseText,
+            }),
+          );
+          scrollIntoView();
+        },
         100,
         { leading: false, trailing: true },
       );
 
-      // Use buffer because long strings (e.g. tool call output) may be split into multiple chunks
       let buffer = '';
 
       // eslint-disable-next-line no-constant-condition
@@ -545,10 +568,6 @@ const Prompt: React.FC<PromptProps> = ({ scrollIntoView }) => {
         }
         buffer += decoder.decode(value, { stream: true });
         const lines = buffer.split('\n');
-
-        // Keep the last line in the buffer. If the chunk ended mid-line, this holds the incomplete
-        // line until more data arrives. If the chunk ended with '\n', split() produces an empty
-        // string as the last element, so we just hold an empty buffer and process all lines.
         buffer = lines.pop() ?? '';
 
         lines
@@ -565,8 +584,21 @@ const Prompt: React.FC<PromptProps> = ({ scrollIntoView }) => {
             if (json && json.event && json.data) {
               if (json.event === 'start') {
                 dispatch(setConversationID(json.data.conversation_id));
+              } else if (json.event === 'reasoning') {
+                const round = json.data.round as number;
+                if (round !== reasoningRound) {
+                  if (reasoningText) {
+                    reasoningText += '\n\n';
+                  }
+                  reasoningText += `[Round ${round}]\n`;
+                  reasoningRound = round;
+                }
+                reasoningText += json.data.reasoning;
+                appendToBlock('reasoning', json.data.reasoning);
+                dispatchTokens();
               } else if (json.event === 'token') {
                 responseText += json.data.token;
+                appendToBlock('text', json.data.token);
                 dispatchTokens();
               } else if (json.event === 'end') {
                 dispatchTokens.flush();
@@ -580,6 +612,8 @@ const Prompt: React.FC<PromptProps> = ({ scrollIntoView }) => {
               } else if (json.event === 'tool_call') {
                 const { args, id, name: toolName } = json.data;
                 dispatch(chatHistoryUpdateTool(chatEntryID, id, { name: toolName, args }));
+                contentBlocks.push({ type: 'tool', toolId: id });
+                dispatchTokens();
               } else if (json.event === 'tool_result') {
                 const {
                   content,
@@ -633,7 +667,7 @@ const Prompt: React.FC<PromptProps> = ({ scrollIntoView }) => {
     dispatch(setQuery(''));
     dispatch(attachmentsClear());
     textareaRef.current?.focus();
-  }, [attachments, conversationID, dispatch, isStreaming, query, scrollIntoView, t]);
+  }, [attachments, conversationID, dispatch, isStreaming, query, scrollIntoView, selectedModel, t]);
 
   const streamingResponseID: string = isStreaming
     ? (chatHistory.last()?.get('id') as string)
@@ -670,7 +704,7 @@ const Prompt: React.FC<PromptProps> = ({ scrollIntoView }) => {
 
   return (
     <div>
-      {/* @ts-expect-error: TS2786 */}
+      {/**/}
       <MessageBar
         alwayShowSendButton
         attachMenuProps={{

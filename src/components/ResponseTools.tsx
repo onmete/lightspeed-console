@@ -14,7 +14,7 @@ type ToolProps = {
   toolID: string;
 };
 
-const ToolLabel: React.FC<ToolProps> = ({ entryIndex, toolID }) => {
+export const ToolLabel: React.FC<ToolProps> = ({ entryIndex, toolID }) => {
   const dispatch = useDispatch();
 
   const toolMap = useSelector((s: State) =>

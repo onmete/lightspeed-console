@@ -19,6 +19,7 @@ export enum ActionType {
   OpenToolClear = 'openToolClear',
   OpenToolSet = 'openToolSet',
   SetConversationID = 'setConversationID',
+  SetSelectedModel = 'setSelectedModel',
   SetIsContextEventsLoading = 'setIsContextEventsLoading',
   SetQuery = 'setQuery',
   UserFeedbackClose = 'userFeedbackClose',
@@ -84,6 +85,8 @@ export const openToolSet = (chatEntryIndex: number, id: string) =>
 
 export const setConversationID = (id: string) => action(ActionType.SetConversationID, { id });
 
+export const setSelectedModel = (model: string) => action(ActionType.SetSelectedModel, { model });
+
 export const setIsContextEventsLoading = (isLoading: boolean) =>
   action(ActionType.SetIsContextEventsLoading, { isLoading });
 
@@ -125,6 +128,7 @@ const actions = {
   openToolSet,
   setConversationID,
   setIsContextEventsLoading,
+  setSelectedModel,
   setQuery,
   userFeedbackClose,
   userFeedbackDisable,

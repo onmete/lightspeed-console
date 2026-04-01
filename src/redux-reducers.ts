@@ -32,6 +32,7 @@ const reducer = (state: OLSState, action: OLSAction): OLSState => {
       openAttachment: null,
       openTool: ImmutableMap({ chatEntryIndex: null, id: null }),
       query: '',
+      selectedModel: 'claude-sonnet-4-5',
     });
   }
 
@@ -67,7 +68,15 @@ const reducer = (state: OLSState, action: OLSAction): OLSState => {
       const index = state
         .get('chatHistory')
         .findIndex((entry) => entry.get('id') === action.payload.id);
-      return state.mergeIn(['chatHistory', index], action.payload.entry);
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const entryData = action.payload.entry as Record<string, any>;
+      if (entryData.contentBlocks) {
+        const { contentBlocks, ...rest } = entryData;
+        return state
+          .setIn(['chatHistory', index, 'contentBlocks'], contentBlocks)
+          .mergeIn(['chatHistory', index], rest);
+      }
+      return state.mergeIn(['chatHistory', index], entryData);
     }
 
     case ActionType.chatHistoryUpdateTool: {
@@ -114,6 +123,9 @@ const reducer = (state: OLSState, action: OLSAction): OLSState => {
 
     case ActionType.SetConversationID:
       return state.set('conversationID', action.payload.id);
+
+    case ActionType.SetSelectedModel:
+      return state.set('selectedModel', action.payload.model);
 
     case ActionType.SetQuery:
       return state.set('query', action.payload.query);

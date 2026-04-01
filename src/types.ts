@@ -36,6 +36,11 @@ export type Tool = {
   structuredContent?: Record<string, unknown>;
 };
 
+export type ContentBlock =
+  | { type: 'reasoning'; content: string }
+  | { type: 'text'; content: string }
+  | { type: 'tool'; toolId: string };
+
 type ChatEntryUser = {
   attachments: { [key: string]: Attachment };
   text: string;
@@ -43,11 +48,13 @@ type ChatEntryUser = {
 };
 
 type ChatEntryAI = {
+  contentBlocks?: ContentBlock[];
   error?: ErrorType;
   id: string;
   isCancelled: boolean;
   isStreaming: boolean;
   isTruncated: boolean;
+  reasoning?: string;
   references?: Array<ReferencedDoc>;
   text?: string;
   tools?: ImmutableMap<string, Tool>;

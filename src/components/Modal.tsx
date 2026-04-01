@@ -12,13 +12,17 @@ type Props = {
   title: React.ReactNode;
 };
 
+const getChatbotParent = () =>
+  document.querySelector('[data-test="ols-plugin__popover"]') || document.body;
+
 const Modal: React.FC<Props> = ({ children, className, isOpen, onClose, title }) => (
   <ReactModal
     ariaHideApp={false}
     className={`modal-dialog ols-plugin__modal${className ? ` ${className}` : ''}`}
     isOpen={isOpen}
     onRequestClose={onClose}
-    overlayClassName="co-overlay"
+    overlayClassName="ols-plugin__modal-overlay"
+    parentSelector={getChatbotParent}
   >
     <div className="modal-header">
       <CloseButton onClose={onClose} />
